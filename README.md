@@ -2,6 +2,10 @@
 
 Bu proje, Ebebek ana sayfasındaki ürün karuseline birebir benzeyen bir karusel oluşturmayı amaçlamaktaydı. Karusel, önerilen ürünleri listeleyerek kullanıcı deneyimini geliştirmeyi hedeflendi.
 
+## 🚀 Proje Resimleri
+![2](https://github.com/user-attachments/assets/d99a8490-2301-4e72-b64f-c737831c763d)
+![1](https://github.com/user-attachments/assets/b0907622-c901-4e61-9b64-0e3cae79604a)
+
 ## 🚀 Proje Özellikleri
 
 - **Ürün Verisi:** Ürünler, aşağıdaki API üzerinden çekildi:
