@@ -1,32 +1,32 @@
 (() => {
-  if (window.location.pathname !== "/") {
-    console.log("Wrong page!");
-    return;
-  }
+    if (window.location.pathname !== "/") {
+        console.log("Wrong page!");
+        return;
+    }
 
-  const init = () => {
-    let script = document.createElement("script");
-    script.src = "https://code.jquery.com/jquery-3.7.1.min.js";
-    script.type = "text/javascript";
-    script.onload = () => {
-      console.log("jQuery yüklendi");
-      buildHTML();
-      buildCSS();
-      fetchProducts();
-      setEvents();
-      $(window).on("resize", adjustCarousel);
+    const init = () => {
+        let script = document.createElement("script");
+        script.src = "https://code.jquery.com/jquery-3.7.1.min.js";
+        script.type = "text/javascript";
+        script.onload = () => {
+            console.log("jQuery yüklendi");
+            buildHTML();
+            buildCSS();
+            fetchProducts();
+            setEvents();
+            $(window).on("resize", adjustCarousel);
+        };
+        script.onerror = () => {
+            console.error("jQuery yüklenemedi");
+        };
+        document.getElementsByTagName("head")[0].appendChild(script);
     };
-    script.onerror = () => {
-      console.error("jQuery yüklenemedi");
-    };
-    document.getElementsByTagName("head")[0].appendChild(script);
-  };
 
-  const buildHTML = () => {
-    const carouselHTML = `
+    const buildHTML = () => {
+        const carouselHTML = `
           <div class="carousel-container">
             <div class="container">
-              <p>Sizin İçin Seçtiklerimiz</p>
+              <p>Beğenebileceğinizi Düşündüklerimiz</p>
               <div class="carousel-wrapper">
                 <div class="carousel"></div>
                 <button class="prev-btn"><span>❮</span></button>
@@ -35,15 +35,15 @@
             </div>
           </div>
         `;
-    if ($(".stories").length > 0) {
-      $(".stories").after(carouselHTML);
-    } else {
-      $("body").append(carouselHTML);
-    }
-  };
+        if ($(".stories").length > 0) {
+            $(".stories").after(carouselHTML);
+        } else {
+            $("body").append(carouselHTML);
+        }
+    };
 
-  const buildCSS = () => {
-    const css = `
+    const buildCSS = () => {
+        const css = `
               @import url('https://fonts.googleapis.com/css2?family=Quicksand:wght@300;400;700&display=swap');
         
               .carousel-container {
@@ -371,250 +371,250 @@
                 }
               }
             `;
-    $("<style>").addClass("carousel-style").html(css).appendTo("head");
-  };
-
-  const fetchProducts = () => {
-    const apiUrl =
-      "https://gist.githubusercontent.com/sevindi/8bcbde9f02c1d4abe112809c974e1f49/raw/9bf93b58df623a9b16f1db721cd0a7a539296cf0/products.json";
-
-    const handleProducts = (products) => {
-      const enhancedProducts = products.map((product) => ({
-        ...product,
-        rating: product.rating || 5,
-        reviewCount:
-          product.reviewCount || Math.floor(Math.random() * 100) + 10,
-        originalPrice:
-          product.originalPrice ||
-          (parseFloat(product.price) * 1.25).toFixed(2),
-        discount: product.discount || 20,
-        isBestseller:
-          product.isBestseller !== undefined
-            ? product.isBestseller
-            : Math.random() > 0.7,
-        isStarProduct:
-          product.isStarProduct !== undefined
-            ? product.isStarProduct
-            : Math.random() > 0.7,
-      }));
-      renderProducts(enhancedProducts);
-      adjustCarousel();
+        $("<style>").addClass("carousel-style").html(css).appendTo("head");
     };
 
-    if (localStorage.getItem("products")) {
-      const storedProducts = JSON.parse(localStorage.getItem("products"));
-      handleProducts(storedProducts);
-    } else {
-      fetch(apiUrl)
-        .then((response) => {
-          if (!response.ok) {
-            throw new Error(`HTTP hatası! status kodu: ${response.status}`);
-          }
-          return response.json();
-        })
-        .then((products) => {
-          localStorage.setItem("products", JSON.stringify(products));
-          handleProducts(products);
-        })
-        .catch((error) => {
-          console.error("Verileri çekerken hata oluştu : ", error);
+    const fetchProducts = () => {
+        const apiUrl =
+            "https://gist.githubusercontent.com/sevindi/8bcbde9f02c1d4abe112809c974e1f49/raw/9bf93b58df623a9b16f1db721cd0a7a539296cf0/products.json";
+
+        const handleProducts = (products) => {
+            const enhancedProducts = products.map((product) => ({
+                ...product,
+                rating: product.rating || 5,
+                reviewCount:
+                    product.reviewCount || Math.floor(Math.random() * 100) + 10,
+                originalPrice:
+                    product.originalPrice ||
+                    (parseFloat(product.price) * 1.25).toFixed(2),
+                discount: product.discount || 20,
+                isBestseller:
+                    product.isBestseller !== undefined
+                        ? product.isBestseller
+                        : Math.random() > 0.7,
+                isStarProduct:
+                    product.isStarProduct !== undefined
+                        ? product.isStarProduct
+                        : Math.random() > 0.7,
+            }));
+            renderProducts(enhancedProducts);
+            adjustCarousel();
+        };
+
+        if (localStorage.getItem("products")) {
+            const storedProducts = JSON.parse(localStorage.getItem("products"));
+            handleProducts(storedProducts);
+        } else {
+            fetch(apiUrl)
+                .then((response) => {
+                    if (!response.ok) {
+                        throw new Error(`HTTP hatası! status kodu: ${response.status}`);
+                    }
+                    return response.json();
+                })
+                .then((products) => {
+                    localStorage.setItem("products", JSON.stringify(products));
+                    handleProducts(products);
+                })
+                .catch((error) => {
+                    console.error("Verileri çekerken hata oluştu : ", error);
+                });
+        }
+    };
+
+    const renderProducts = (products) => {
+        const carousel = $(".carousel");
+        carousel.empty();
+        products.forEach((product) => {
+            const favoriteIds = loadFavorites();
+            const isFavorited = favoriteIds.includes(product.id) ? "favorited" : "";
+            let starsHtml = "";
+            for (let i = 0; i < 5; i++) {
+                starsHtml += '<span class="star">★</span>';
+            }
+            const productCard = $("<div>")
+                .addClass("product-card")
+                .attr("data-product-id", product.id);
+            const imageContainer = $("<div>")
+                .addClass("product-image-container")
+                .append(
+                    $("<img>")
+                        .addClass("product-image")
+                        .attr("src", product.img)
+                        .attr("alt", product.name)
+                );
+            const badgeContainer = $("<div>").addClass("badge-container");
+            if (product.isBestseller) {
+                badgeContainer.append(
+                    $("<div>").addClass("badge bestseller-badge").html("ÇOK<br>SATAN")
+                );
+            }
+            if (product.isStarProduct) {
+                badgeContainer.append(
+                    $("<div>").addClass("badge star-product-badge").html("YILDIZ<br>ÜRÜN")
+                );
+            }
+            imageContainer.append(badgeContainer);
+            const heartIconSrc = isFavorited
+                ? "https://img.icons8.com/?size=100&id=aId5rVASLwDE&format=png&color=FD7E14"
+                : "https://www.e-bebek.com/assets/svg/default-favorite.svg";
+            imageContainer.append(
+                $("<button>")
+                    .addClass("favorite-btn")
+                    .addClass(isFavorited)
+                    .append(
+                        $("<img>")
+                            .attr("src", heartIconSrc)
+                            .attr("alt", "Favorite")
+                            .addClass("favorite-icon")
+                    )
+            );
+            productCard.append(imageContainer);
+            const productInfo = $("<div>").addClass("product-info");
+            const title = $("<h3>").addClass("product-title");
+            title.append($("<span>").addClass("product-brand").text(product.brand));
+            title.append(" - ");
+            title.append($("<span>").addClass("product-name").text(product.name));
+            productInfo.append(title);
+            const ratingContainer = $("<div>").addClass("rating-container");
+            ratingContainer.append($("<div>").addClass("stars").html(starsHtml));
+            ratingContainer.append(
+                $("<span>").addClass("review-count").text(`(${product.reviewCount})`)
+            );
+            productInfo.append(ratingContainer);
+            const priceContainer = $("<div>").addClass("price-container");
+            const priceRow = $("<div>");
+            priceRow.append(
+                $("<span>")
+                    .addClass("original-price")
+                    .text(`${product.originalPrice} TL`)
+            );
+            priceRow.append(
+                $("<span>").addClass("discount-badge").text(`%${product.discount}`)
+            );
+            priceContainer.append(priceRow);
+            priceContainer.append(
+                $("<span>").addClass("current-price").text(`${product.price} TL`)
+            );
+            productInfo.append(priceContainer);
+            productInfo.append(
+                $("<button>").addClass("add-to-cart-btn").text("Sepete Ekle")
+            );
+            productCard.append(productInfo);
+            carousel.append(productCard);
         });
-    }
-  };
+    };
 
-  const renderProducts = (products) => {
-    const carousel = $(".carousel");
-    carousel.empty();
-    products.forEach((product) => {
-      const favoriteIds = loadFavorites();
-      const isFavorited = favoriteIds.includes(product.id) ? "favorited" : "";
-      let starsHtml = "";
-      for (let i = 0; i < 5; i++) {
-        starsHtml += '<span class="star">★</span>';
-      }
-      const productCard = $("<div>")
-        .addClass("product-card")
-        .attr("data-product-id", product.id);
-      const imageContainer = $("<div>")
-        .addClass("product-image-container")
-        .append(
-          $("<img>")
-            .addClass("product-image")
-            .attr("src", product.img)
-            .attr("alt", product.name)
-        );
-      const badgeContainer = $("<div>").addClass("badge-container");
-      if (product.isBestseller) {
-        badgeContainer.append(
-          $("<div>").addClass("badge bestseller-badge").html("ÇOK<br>SATAN")
-        );
-      }
-      if (product.isStarProduct) {
-        badgeContainer.append(
-          $("<div>").addClass("badge star-product-badge").html("YILDIZ<br>ÜRÜN")
-        );
-      }
-      imageContainer.append(badgeContainer);
-      const heartIconSrc = isFavorited
-        ? "https://img.icons8.com/?size=100&id=aId5rVASLwDE&format=png&color=FD7E14"
-        : "https://www.e-bebek.com/assets/svg/default-favorite.svg";
-      imageContainer.append(
-        $("<button>")
-          .addClass("favorite-btn")
-          .addClass(isFavorited)
-          .append(
-            $("<img>")
-              .attr("src", heartIconSrc)
-              .attr("alt", "Favorite")
-              .addClass("favorite-icon")
-          )
-      );
-      productCard.append(imageContainer);
-      const productInfo = $("<div>").addClass("product-info");
-      const title = $("<h3>").addClass("product-title");
-      title.append($("<span>").addClass("product-brand").text(product.brand));
-      title.append(" - ");
-      title.append($("<span>").addClass("product-name").text(product.name));
-      productInfo.append(title);
-      const ratingContainer = $("<div>").addClass("rating-container");
-      ratingContainer.append($("<div>").addClass("stars").html(starsHtml));
-      ratingContainer.append(
-        $("<span>").addClass("review-count").text(`(${product.reviewCount})`)
-      );
-      productInfo.append(ratingContainer);
-      const priceContainer = $("<div>").addClass("price-container");
-      const priceRow = $("<div>");
-      priceRow.append(
-        $("<span>")
-          .addClass("original-price")
-          .text(`${product.originalPrice} TL`)
-      );
-      priceRow.append(
-        $("<span>").addClass("discount-badge").text(`%${product.discount}`)
-      );
-      priceContainer.append(priceRow);
-      priceContainer.append(
-        $("<span>").addClass("current-price").text(`${product.price} TL`)
-      );
-      productInfo.append(priceContainer);
-      productInfo.append(
-        $("<button>").addClass("add-to-cart-btn").text("Sepete Ekle")
-      );
-      productCard.append(productInfo);
-      carousel.append(productCard);
-    });
-  };
+    const loadFavorites = () => {
+        return JSON.parse(localStorage.getItem("favoriteIds")) || [];
+    };
 
-  const loadFavorites = () => {
-    return JSON.parse(localStorage.getItem("favoriteIds")) || [];
-  };
+    const saveFavorites = (favoriteIds) => {
+        localStorage.setItem("favoriteIds", JSON.stringify(favoriteIds));
+    };
 
-  const saveFavorites = (favoriteIds) => {
-    localStorage.setItem("favoriteIds", JSON.stringify(favoriteIds));
-  };
+    const getScrollAmount = () => {
+        const carousel = $(".carousel");
+        const cards = carousel.find(".product-card");
+        if (!cards.length) {
+            return 0;
+        }
+        return cards.first().outerWidth(true);
+    };
 
-  const getScrollAmount = () => {
-    const carousel = $(".carousel");
-    const cards = carousel.find(".product-card");
-    if (!cards.length) {
-      return 0;
-    }
-    return cards.first().outerWidth(true);
-  };
+    const slideCarousel = (direction) => {
+        const carousel = $(".carousel");
+        const scrollAmount = getScrollAmount();
+        const currentScrollLeft = carousel.scrollLeft();
+        const newScrollPosition =
+            direction === "left"
+                ? currentScrollLeft - scrollAmount
+                : currentScrollLeft + scrollAmount;
+        carousel.animate({ scrollLeft: newScrollPosition }, 300);
+    };
 
-  const slideCarousel = (direction) => {
-    const carousel = $(".carousel");
-    const scrollAmount = getScrollAmount();
-    const currentScrollLeft = carousel.scrollLeft();
-    const newScrollPosition =
-      direction === "left"
-        ? currentScrollLeft - scrollAmount
-        : currentScrollLeft + scrollAmount;
-    carousel.animate({ scrollLeft: newScrollPosition }, 300);
-  };
+    const adjustCarousel = () => {
+        updateNavigationButtons();
+    };
 
-  const adjustCarousel = () => {
-    updateNavigationButtons();
-  };
+    const updateNavigationButtons = () => {
+        const carousel = $(".carousel");
+        const maxScroll = carousel[0].scrollWidth - carousel[0].clientWidth;
+        const currentScroll = carousel.scrollLeft();
+        if (currentScroll <= 0) {
+            $(".prev-btn").css("opacity", "0.5");
+        } else {
+            $(".prev-btn").css("opacity", "1");
+        }
+        if (currentScroll >= maxScroll - 5) {
+            $(".next-btn").css("opacity", "0.5");
+        } else {
+            $(".next-btn").css("opacity", "1");
+        }
+    };
 
-  const updateNavigationButtons = () => {
-    const carousel = $(".carousel");
-    const maxScroll = carousel[0].scrollWidth - carousel[0].clientWidth;
-    const currentScroll = carousel.scrollLeft();
-    if (currentScroll <= 0) {
-      $(".prev-btn").css("opacity", "0.5");
-    } else {
-      $(".prev-btn").css("opacity", "1");
-    }
-    if (currentScroll >= maxScroll - 5) {
-      $(".next-btn").css("opacity", "0.5");
-    } else {
-      $(".next-btn").css("opacity", "1");
-    }
-  };
+    const getProductById = (productId) => {
+        const storedProducts = JSON.parse(localStorage.getItem("products")) || [];
+        return storedProducts.find((p) => p.id === productId);
+    };
 
-  const getProductById = (productId) => {
-    const storedProducts = JSON.parse(localStorage.getItem("products")) || [];
-    return storedProducts.find((p) => p.id === productId);
-  };
+    const setEvents = () => {
+        $(document).on("click", ".favorite-btn", function (event) {
+            event.stopPropagation();
+            const button = $(this);
+            const productId = button.closest(".product-card").data("product-id");
+            let favoriteIds = loadFavorites();
+            if (favoriteIds.includes(productId)) {
+                favoriteIds = favoriteIds.filter((id) => id !== productId);
+                button.removeClass("favorited");
+                button
+                    .find("img")
+                    .attr(
+                        "src",
+                        "https://www.e-bebek.com/assets/svg/default-favorite.svg"
+                    );
+            } else {
+                favoriteIds.push(productId);
+                button.addClass("favorited");
+                button
+                    .find("img")
+                    .attr(
+                        "src",
+                        "https://img.icons8.com/?size=100&id=aId5rVASLwDE&format=png&color=FD7E14"
+                    );
+            }
+            saveFavorites(favoriteIds);
+        });
 
-  const setEvents = () => {
-    $(document).on("click", ".favorite-btn", function (event) {
-      event.stopPropagation();
-      const button = $(this);
-      const productId = button.closest(".product-card").data("product-id");
-      let favoriteIds = loadFavorites();
-      if (favoriteIds.includes(productId)) {
-        favoriteIds = favoriteIds.filter((id) => id !== productId);
-        button.removeClass("favorited");
-        button
-          .find("img")
-          .attr(
-            "src",
-            "https://www.e-bebek.com/assets/svg/default-favorite.svg"
-          );
-      } else {
-        favoriteIds.push(productId);
-        button.addClass("favorited");
-        button
-          .find("img")
-          .attr(
-            "src",
-            "https://img.icons8.com/?size=100&id=aId5rVASLwDE&format=png&color=FD7E14"
-          );
-      }
-      saveFavorites(favoriteIds);
-    });
+        $(document).on("click", ".add-to-cart-btn", function (event) {
+            event.stopPropagation();
+            const productId = $(this).closest(".product-card").data("product-id");
+            console.log(`${productId} ürünü eklendi!`);
+        });
 
-    $(document).on("click", ".add-to-cart-btn", function (event) {
-      event.stopPropagation();
-      const productId = $(this).closest(".product-card").data("product-id");
-      console.log(`${productId} ürünü eklendi!`);
-    });
+        $(document).on("click", ".prev-btn", () => {
+            slideCarousel("left");
+        });
 
-    $(document).on("click", ".prev-btn", () => {
-      slideCarousel("left");
-    });
+        $(document).on("click", ".next-btn", () => {
+            slideCarousel("right");
+        });
 
-    $(document).on("click", ".next-btn", () => {
-      slideCarousel("right");
-    });
+        $(".carousel").on("scroll", updateNavigationButtons);
 
-    $(".carousel").on("scroll", updateNavigationButtons);
+        $(document).on("click", ".product-card", function (event) {
+            if (
+                $(event.target).is(".favorite-btn, .favorite-btn *, .add-to-cart-btn")
+            ) {
+                return;
+            }
+            const productId = $(this).data("product-id");
+            const product = getProductById(productId);
+            if (product?.url) {
+                window.open(product.url, "_blank");
+            }
+        });
+    };
 
-    $(document).on("click", ".product-card", function (event) {
-      if (
-        $(event.target).is(".favorite-btn, .favorite-btn *, .add-to-cart-btn")
-      ) {
-        return;
-      }
-      const productId = $(this).data("product-id");
-      const product = getProductById(productId);
-      if (product?.url) {
-        window.open(product.url, "_blank");
-      }
-    });
-  };
-
-  init();
+    init();
 })();
